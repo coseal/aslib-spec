@@ -10,7 +10,7 @@ repository](https://github.com/coseal/aslib_data).
 Bernd Bischl - University of Dortmund, Germany
 <bischl@statistik.tu-dortmund.de>
 
-Lars Kotthoff - Cork Constraint Computation Centre, Ireland 
+Lars Kotthoff - Insight Centre for Data Analytics, Cork, Ireland 
 <lars.kotthoff@insight-centre.org>
 
 Marius Lindauer - University of Freiburg, Germany
@@ -20,7 +20,7 @@ Marius Lindauer - University of Freiburg, Germany
 
 * Bernd Bischl - University of Dortmund
 * Pascal Kerschke - University of Münster
-* Lars Kotthoff - Cork Constraint Computation Centre
+* Lars Kotthoff - Insight Centre for Data Analytics, Cork, Ireland
 * Marius Lindauer - University of Freiburg
 * Yuri Malitsky - IBM Thomas J. Watson Research Center
 * Alexandre Frechette - University of British Columbia
