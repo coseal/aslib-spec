@@ -1,0 +1,495 @@
+%\section{Data Specification}
+%\label{sec:spec}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Directory / File Layout} 
+\begin{itemize}
+	\item Every algorithm selection scenario is stored in an individual folder on the server.
+	\item The folder contains at most one copy of the following, optional files are marked with an (*)
+  	\begin{itemize}
+  		\item \filename{readme.txt}: Human-readable with general information. 
+  		\item \filename{description.txt}: Global definitions for the scenario. 
+  		\item \filename{feature\_values.arff}: Values of features used to predict solvers. 
+  		\item \filename{feature\_runstatus.arff}: Technical info about features, \eg{} aborts. 
+  		\item \filename{feature\_costs.arff} ($^*$): Costs of feature (step) calculation.
+  		\item \filename{algorithm\_runs.arff}: Algorithm runs and performance measurements.
+  		\item \filename{cv.arff} ($^*$): Cross-validation splits for evaluation. Users are allowed
+                  to (if they have good reason) to submit this file, but in general it will be generated
+                  on the repository server automatically, when the rest of the data set is submitted.
+		\item \filename{ground\_truth.arff} ($^*$): Information about solution of instances. 
+		\item \filename{citation.bib} ($^*$): Citation file for data set. 
+  	\end{itemize}
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{General Remarks} 
+
+Please keep the following in mind when generating the files.
+
+\begin{itemize}
+  	\item Every file base name / column name / factor level name adheres to: ASCII characters; if whitespaces or 
+		commas are used, the name has to be quoted
+	\item Instance IDs can also contain ``\texttt{/}'' to represent an original file path.
+	\item We \textbf{highly} recommend using descriptive instance names rather than using numerical IDs. One 
+		possible purpose for this is that such descriptive instance names can later be used to reproduce experiments.
+	\item All pairs of instance ID and repetition number have to be unique.
+  	\item Use \qm to denote missing values conforming to the rules of the ARFF mechanism. Each such \qm must be
+		explained in the \filename{readme} making it clear why the missing values occurred where they did. Also, 
+		use the \enquote{runstatus} concept, explained below, for features and algorithms. Never use anything else
+		except \qm for missing values. 
+    	\item relations of all \filename{arff}-files should begin with the information type and end with scenario\_id 
+		(see \filename{description.txt});  e.g., if we have instance features of the $2013$ SAT Competition, the 
+		relation name of the \filename{feature\_values} should be 
+		\texttt{@RELATION FEATURE\_VALUES\_2013-SAT-Competition}. In case of doubt, this helps to identify 
+		files which belong together
+\end{itemize}
+  
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{readme.txt}
+
+This is a human readable file meant to allow the creator to explain any and all peculiarities of how the data came 
+into existence. Most importantly, this file is where the creators must explain the reason for any missing data in the
+set. In addition to this, consider the following as a starting list of things that must be mentioned in this file. But please 
+be aware that explaining things here is no excuse to not have perfectly machine-readable information in the other 
+files or for circumventing format specifications!
+
+\begin{itemize}
+  	\item Must describe where and how the data originated.
+    	\item Describe the problem that the algorithms are supposed to solve and how their performance is measured. 
+	\item Describe the used solvers, their configurations, versions and origins.
+    	\item Reference the feature generator. 
+    	\item Try to include all relevant details of the underlying experiment.   
+\end{itemize} 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{description.txt}
+
+A global description file containing general information about the scenario. This is one of the few files which is not an 
+ARFF, but for machine readability it follows specific guidelines for its generation. Each line contains very specific
+bits of information. Each item in the list that follows specifies the format of the corresponding line. As such, it first 
+presents the line format followed by an explanation. The two parts are separated by a colon.
+
+\begin{itemize}
+	\item scenario\_id [string]: Name of the scenario\\ 
+		This id is necessary for human bookkeeping and making sure that all
+		other files in the directory are for the same set of experiments. In the ARFF files, this id will be present 
+		under the ``@RELATION'' line.
+  	\item performance\_measures [comma-separated list of strings]: Name of performance metrics measured for 
+		the algorithms\\
+		While in many cases only a single entry might be reasonable, there are times when an 
+		experiment may yield secondary objectives. As such, all these measures must be listed in decreasing 
+		order of importance, if there is such an order, the first one being the one of primary interest.
+  	\item maximize [comma-separated list of Booleans]: true / false\\ 
+  	    For each of the objectives listed in the \textit{performance\_measures} line,
+		this line specifies if the objective is to minimize or maximize the corresponding value. The number of entries 
+		must match number of entries in \stringval{performance\_measures}.
+  	\item performance\_type [comma-separated list of factors]: runtime / solution\_quality
+  	    For each of the objectives listed for \stringval{performance\_measures},
+		this line specifies whether the corresponding metric is\stringval{runtime} 
+		or \stringval{solution\_quality}. Number of entries must match number of entries in 
+		\stringval{performance\_measures}.
+ 	\item algorithm\_cutoff\_time [integer]: Cut-off time in seconds\\ 
+ 	    Algorithms are terminated after this time if they did 
+		not produce a successful solution. Might be used both for \stringval{runtime} and \stringval{solution\_quality}.
+  	      	Put \qm if it was not set for experiment.
+  	\item algorithm\_cutoff\_memory [integer]: Cut-off memory in megabytes\\
+  	    Algorithms are terminated if their memory
+		exceeded this value. Might be used both for \stringval{runtime} and \stringval{solution\_quality}. Put \qm if it 
+		was not set for experiment. 
+  	\item features\_cutoff\_time [integer]: Cut-off time in seconds\\
+  	    Feature set computation is terminated if it exceeds 
+		this time. Might be used both for \stringval{runtime} and \stringval{solution\_quality}.
+                Put \qm if it was not set for experiment. 
+  	\item features\_cutoff\_memory [integer]: Cut-off memory in megabytes 
+  	    \\Feature set computation is terminated if 
+		memory exceeded this value. Might be used both for \stringval{runtime} and \stringval{solution\_quality}. Put 
+		\qm if it was not set for experiment. 
+    \item algorithms\_deterministic: [comma-separated list of strings]\\
+          List names of all algorithms which are deterministic.
+    \item algorithms\_stochastic: [comma-separated list of strings]\\
+          List names of all algorithms which are stochastic.
+    \item The next lines allow to define dependencies of features to processing steps. 
+    	   For instance, probing features need normally a preprocessing step. 
+    	   Therefore probing features depend on the preprocessing step and the probing step.
+    	   This is helpful for \filename{feature\_costs.arff}, as feature
+           generators often calculate features in several steps. 
+      	   The first line should define the number of steps 
+		   that are to be listed. 
+		   Each feature has to be listed in at least one step.
+		   To be able to use a feature, all processing steps have to be used in which the feature is listed.
+		   On the other hand, if $S' \subseteq S$ processing steps are used and we have a set of features $F(S)$ listed in $S$,
+		   you are able to use features $F' = F(S) \backslash F(S \backslash S')$, \ie{} features that are not listed in not used steps.   
+		   The steps have to be sorted according to their execution sequence.
+		   Their definition looks like this:\\
+           		$\-\hspace{1cm}$ number\_of\_feature\_steps: 2\\
+  	      		$\-\hspace{1cm}$ feature\_step name\_1: feature1, feature2, feature4\\
+  	      		$\-\hspace{1cm}$ feature\_step name\_2: feature3, feature4\\
+              	You are free to use any step names you like, 
+              	as long as they are unique and do not contain illegal characters.
+    \item default\_steps: [comma-separated list of strings]\\
+    	  List names of all features which should be used as a default.
+    \item features\_deterministic: [comma-separated list of strings]\\
+    	  List names of all features processing steps which are deterministic.
+    \item features\_stochastic: [comma-separated list of strings]\\
+          List names of all features which are stochastic. 
+\end{itemize}
+
+\begin{lstlisting}[caption=Example description.txt]
+scenario_id: 2013-SAT-Competition
+performance_measures: PAR10, Number_of_satisfied_clauses
+maximize: false, true
+performance_type: runtime, solution_quality
+algorithm_cutoff_time: 900
+algorithm_cutoff_memory: 6000
+features_cutoff_time: 90
+features_cutoff_memory: 6000
+algorithms_deterministic: lingeling, clasp
+algorithms_stochastic: sparrow
+number_of_feature_steps: 2
+feature_step preprocessing: number_of_variables, first_local_min_steps
+feature_step local_search_probing: first_local_min_steps
+default_steps: preprocessing
+features_deterministic: number_of_variables, first_local_min_steps
+features_stochastic: first_local_min_steps
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{feature\_values.arff}
+
+This file contains the numerical feature values for all instances. Specifically, it is generally assumed that this is the
+information that will be used by implemented techniques to differentiate between different instances. Like with all
+subsequent files, the data stored here should follow the conventions of an ARFF file. It is therefore expected that the
+rows will correspond to a specific (instance, repetition) pair.
+
+
+\begin{itemize}
+  	\item The first column is called \colname{instance\_id} and contains the instance name represented as a string. 
+		These names must follow the guidelines of utilizing only ASCII characters.
+  	\item The second column specifies the \colname{repetition} and contains integers, starting at 1 and increasing in 
+  		increments of 1 for each instance with the same name.  
+  	\item The following columns correspond to instance features. We allow numeric, integer and categorical columns,
+		but only the names defined in \filename{description.txt} can be used. In that file, these names were specified 
+		in fields \stringval{features\_step}.
+ 	 \item \qm means the feature value is missing because the feature calculation algorithm crashed or aborted or
+    		some other problem occurred. The explanation of such a missing value will need to be registered in 
+		\filename{feature\_runstatus.arff}.
+  	\item In the case of stochastic features, the user might opt to repeat the feature calculation (column
+		\colname{repetition}). The following remarks have to be respected: 
+        		\begin{itemize}
+          		\item In case of no repetitions, do not omit the column, simply put a $1$ in every 
+                          entry. 
+          		\item If you use repetitions, you can use a different number of repetitions for instances (if you 
+				really insist on it), but always the same number of repetitions for features in one row
+                			(the latter is enforced by the format definition). 
+          		\item If you use repetitions, but some features are deterministic, simply repeat their feature values 
+				across the repetitions.
+          		\item Whether features are stochastic or deterministic is defined implicit over the feature steps 
+          		in \stringval{features\_steps\_deterministic} and \stringval{features\_steps\_stochastic} in in \filename{description.txt}.
+        		\end{itemize} 
+\end{itemize} 
+
+\begin{lstlisting}[caption=Example feature\_values.arff with three features]
+@RELATION FEATURE_VALUES_2013-SAT-Competition
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE number_of_variables NUMERIC
+@ATTRIBUTE number_of_clauses NUMERIC
+@ATTRIBUTE first_local_min_steps NUMERIC
+
+@DATA
+inst1.cnf,1,101,24,33
+inst1.cnf,2,101,24,42
+inst2.cnf,1,303,105,12
+inst2.cnf,2,303,105,?
+inst3.cnf,1,1002,337,?
+inst3.cnf,2,1002,337,?
+...
+\end{lstlisting}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{feature\_runstatus.arff}
+
+This file contains technical information about the feature calculation in general. Specifically, it serves to state whether 
+the execution of feature processing steps was successful or if some crash occurred. The file is designed to allow the user to
+specify what kind of a crash has transpired, but the reasons for each such situation must be explained in the 
+\filename{readme.txt} file. 
+
+We assume that feature processing steps are able to generate features if its execution terminates successfully.
+If a step terminates because of another reason, \eg{} timeout or memout,   
+all features are not available which depend on this processing step as defined in \filename{description.txt}.
+
+% To provide increased flexibility, this file requires information to be provided about each feature separately. This is
+% to cover situations where some features of a group are computed normally while others are not, as might be the
+% case due to a timeout.
+
+\begin{itemize}
+	\item The first column is the \colname{instance\_id} and contains the instance name in string format. These names 
+  		must follow the guidelines of utilizing only ASCII characters.
+  	\item The second column specifies the \colname{repetition} and contains integers, starting at $1$ and increasing in 
+  		increments of $1$ for each instance with the same name.  
+  	\item The two columns, \colname{instance\_id} and \colname{repetition}, must represent exactly the same data as
+  		presented in \filename{feature\_values.arff}.
+  	\item All remaining columns correspond to feature processing steps. Here, the same column names  
+  		must be adhered to as was defined in \filename{description.txt}. The entries are categoric values
+		specifying the termination condition for each step. The supported range of these values is: 
+        		\begin{itemize}
+        			\item \stringval{ok} - The step was executed normally.
+        			\item \stringval{timeout} - Time ran out before this step terminated.
+       		 		\item \stringval{memout} - Feature computation ran out of memory causing a crash.
+					\item \stringval{presolved} - Instance was solved during feature computation.
+        			\item \stringval{crash} - The program failed to execute.
+        			\item \stringval{unknown} - Feature computation was not run,
+                    probably because an earlier feature computation step
+                    presolved the instance.
+        			\item \stringval{other} - Some other critical problem occurred while this feature was computed.
+        		\end{itemize}
+  	\item If feature calculation is aborted (\stringval{crash} or \stringval{other}), you must explain the reasons in 
+		the \filename{readme.txt}.
+  	\item If at least one used steps has the state \stringval{presolved}, the instance was solved during feature set calculation.
+\end{itemize} 
+
+
+\begin{lstlisting}[caption=Example feature\_runstatus.arff with two feature processing steps]
+@RELATION FEATURE_RUNSTATUS_2013-SAT-Competition
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE preprocessing {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE local_search_probing {ok, timeout, memout, presolved, crash, other}
+
+@DATA
+inst1.cnf,1,ok,ok
+inst1.cnf,2,ok,ok
+inst2.cnf,1,ok,ok
+inst2.cnf,2,ok,timeout
+inst3.cnf,1,ok,memout
+inst3.cnf,2,ok,presolved
+...
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{feature\_costs.arff}
+
+Although usually a minor overhead, feature computation is rarely free. In many cases this cost is in the form of 
+time, but no such requirement is made. Instead, this file specifies the cost of computing each feature processing step. 
+
+We strongly recommend to provide information about feature costs.
+However, you are allowed to omit this file if your scenario does not entail feature costs or you have absolutely no knowledge 
+of them. Please note that certain analysis, \eg{} runtime improvement against best single algorithm, are not possible,
+if feature costs are not provided.  
+
+\begin{itemize}
+  	\item The first column is the \colname{instance\_id} and contains the instance name represented as a string.
+  		 These names must follow the guidelines of utilizing only ASCII characters
+  	\item The second column is an integer specifying the \colname{repetition}, starting at $1$ and increasing in 
+		increments of $1$ per each instance repetition. 
+  	\item The \colname{instance\_id} and \colname{repetition} columns must represent exactly the same data 
+		as in \filename{feature\_values.arff}.
+  	\item All columns correspond to the costs of each feature processing steps. The names of these
+		steps must be exactly the same as those specified in \filename{description.txt} in the feature 
+		step section. Entries are numerical, they specify the cost of the processing step for that 
+		instance / repetition. We recommend to specify a feature processing step for each feature, if
+		the costs for each feature is known. If only the computation cost for all features is known,
+		specify exactly one processing step.
+  	\item Put \qm as an entry if the feature computation was not successful due to cut-off or unusual abort.
+  	%FIXME: ML: if the computation failed because of timeout, the cost is exactly the timeout minus all previous steps
+  	% and a ? shouldn't be used, right?
+  	% And also in all other abortion cases, the cost should be always known.
+\end{itemize}
+
+\begin{lstlisting}[caption=Example feature\_costs.arff]
+@RELATION FEATURE_COSTS_2013-SAT-Competition
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE preprocessing NUMERIC
+@ATTRIBUTE local_search_probing NUMERIC
+
+@DATA
+inst1.cnf,1,0.1,10.0
+inst1.cnf,2,0.1,12.0
+inst2.cnf,1,0.2,4.0
+inst2.cnf,2,0.2,?
+inst3.cnf,1,1.1,?
+inst3.cnf,2,1.1,?
+...
+\end{lstlisting}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{algorithm\_runs.arff}
+
+This file contains information on all algorithms evaluated on the instances. This includes, but not limited to,
+their performance values and runstatus. In practice, certain algorithms may be evaluated multiple times,
+while others can be performed just once. For example, this is the case for stochastic and deterministic 
+solvers, respectively. To cover both scenarios, each row of this file specifies a single experiment. Please 
+note that different algorithms are allowed to have different numbers of repetitions. Similarly, the number of 
+repetitions used for stochastic algorithms does not have to coincide with the number of repetitions used
+for stochastic features. 
+
+\begin{itemize}
+  	\item Each row corresponds to the measurement of 1 algorithm on one instance / repetition.
+  	\item The first column is the \colname{instance\_id} and contains the instance name as a string. 
+  	\item The second column is an integer that states the \colname{repetition}, starting at $1$ and increasing 
+		in increments of $1$ per each instance repetition. The number of repetitions can vary between the algorithms,
+		e.g., the performance of deterministic algorithms are only measured once and of stochastic ones more than once.
+		However, the combination of algorithm and number of repetition should be the same for all instances.
+   	\item \colname{instance\_id} must contain exactly the same elements as the corresponding column in
+ 		\filename{feature\_values.arff}.
+  	\item The third column is called \colname{algorithm}, a string value specifying the name of the 
+		evaluated algorithm. Only the names defined in \filename{description.txt} may be used; those listed
+		under the fields \stringval{algorithms\_deterministic} and \stringval{algorithms\_stochastic}. 
+  	\item All but the last subsequent columns are numerical, containing the algorithm performance 
+		measurements.
+  	\item The last column is called \colname{runstatus} and contains whether the algorithm terminated 
+		normally or the reason for an abort. 
+		\begin{itemize}
+      			\item \stringval{ok}  - The algorithm finished properly.
+      			\item \stringval{timeout} - Time ran out prior to completion.
+      			\item \stringval{memout} - The algorithm required more memory than permitted.
+      			\item \stringval{not\_applicable} - This algorithm can't be run on this instance. 
+			\item \stringval{crash} - The program failed to execute.
+      			\item \stringval{other} - Something really unexpected happened.
+  		\end{itemize}
+  	\item If the run was aborted (\stringval{crash} or \stringval{other}), you have to explain the reasons 
+		in the \filename{readme.txt}.
+  	\item \qm are not permitted in this file. In case of scenarios with runtime as performance type, the runtime is always known regardless of the runstatus. In case of scenarios with solution quality as performance type, missing values have to be imputed somehow. However, this imputation is domain-specific and hence, it has to be provided by the scenario designer.
+\end{itemize}
+
+
+\begin{lstlisting}[caption=Example algorithm\_runs.arff with four algorithms]
+@RELATION ALGORITHM_RUNS_2013-SAT-Competition
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE algorithm STRING
+@ATTRIBUTE PAR10 NUMERIC
+@ATTRIBUTE Number_of_satisfied_clauses NUMERIC
+@ATTRIBUTE runstatus {ok, timeout, memout, not_applicable, crash, other}
+
+inst1.cnf, 1, lingeling, 5.0, 24, ok
+inst1.cnf, 1, clasp, 5.8, 24, ok
+inst1.cnf, 1, sparrow, 900, 20, timeout
+inst1.cnf, 2, sparrow, 1.7, 24, ok
+inst2.cnf, 1, lingeling, 588.1, 105, ok
+inst2.cnf, 1, clasp, 50, 0, memout
+inst2.cnf, 1, sparrow, 501, 105, ok
+inst2.cnf, 2, sparrow, 900, 101, timeout
+...
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{cv.arff}
+
+This file contains information how to split the set of instances according to a cross-validation
+scheme to assess the performance of an algorithm selector in an unbiased and standard fashion.
+The file is provided to guarantee that all algorithm selectors are evaluated on the same splits.
+We support repeated cross-validation, where the process of a single cross-validation is simply 
+repeated. These repetitions are a standard technique for smaller data sets or in cases 
+where other sources of instability might be present in the data.
+
+\begin{itemize}
+  \item The first column is the \colname{instance\_id} and contains the instance name as a string. 
+  		The column must contain exactly the same elements as the corresponding column in
+ 		\filename{feature\_values.arff} at least once.
+  \item The second column is an integer that states the \colname{repetition}, starting at $1$ and increasing 
+		in increments of $1$ per each instance repetition. Note that this is for repeated 
+                cross-validation and has no connection to repeated algorithm runs or repeated feature
+                evaluations. The column is always present, for a simple cross-validation it is always $1$.
+  \item The third column is an integer that states the \colname{fold} of the cross-validation, starting at $1$.
+\end{itemize}
+
+\begin{lstlisting}[caption=Example cv.arff for two times a $2$-fold cross validation]
+@RELATION CV_2013-SAT-Competition
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE fold NUMERIC
+
+inst1.cnf, 1, 1
+inst2.cnf, 1, 1
+inst3.cnf, 1, 2
+inst4.cnf, 1, 2
+inst1.cnf, 2, 1
+inst2.cnf, 2, 2
+inst3.cnf, 2, 2
+inst4.cnf, 2, 1
+...
+\end{lstlisting}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{ground\_truth.arff}
+
+This is an optional file meant to keep the known information about the instance. This information can be 
+used both as a sanity check to make sure the solvers return correct solutions, but can also be used for
+cases where a new evaluation metric depends on the optimal solution. Each row specifies exactly one
+instance, and no duplicates are allowed.
+
+\begin{itemize}
+  	\item Rows correspond to instances.
+  	\item First column is called \colname{instance\_id} and contains a string representing the instance name.
+ 	\item The \colname{instance\_id} column has exactly the same data as in \filename{feature\_values.arff}.
+	\item The other columns provide information about ground truths of each instance, \eg{}
+  		\begin{itemize}
+    			\item Satisfiable or Unsatisfiable for SAT instances.
+    			\item Optimal quality of optimization problems.
+			\item Any other known optimal value of a metric.
+  		\end{itemize}
+  	\item Put \qm if you do not know the ground truth for a particular instance.
+  	\item Omit this file if you do not have this information for any instance.
+\end{itemize}
+
+\begin{lstlisting}[caption=Example ground\_truth.arff]
+@RELATION GROUND_TRUTH_2013-SAT-Competition
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE SATUNSAT {SAT,UNSAT}
+@ATTRIBUTE OPTIMAL_VALUE NUMERIC
+
+@DATA
+inst1.cnf, SAT, 24
+inst2.cnf, UNSAT, 105
+...
+\end{lstlisting}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{citation.bib}
+
+Please provide a bibtex file containing the references that should be cited when using this data
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \subsection{Open TODOs}
+% 
+% \begin{itemize}
+%   \item BB: (**) I do not really think the feature runstatus (in combo with the cutoffs) works perfectly.
+%         we should discuss this last. 
+%   \item BB: we might want to record numeric perf values after feature calculation if presolved=TRUE.
+%         think about to do this, especially when multiple performance measures for algos are 
+%         available. \\
+%         YM: Maybe this is better kept in the ground truth? Otherwise the files become bloated so quickly. From what I 
+%         remember, an arff must contain entries for each column, and if only one finishes during pre solve, its wasted data. 
+%         And if many finish, this info is still replicated in ground\_truth.
+%   \item BB: Is there a problem w.r.t. the cost of deterministic features and feature repetitions. Hopefully not...
+% \end{itemize}

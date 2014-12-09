@@ -1,0 +1,80 @@
+%%This is a very basic article template.
+%%There is just one section and two subsections.
+\documentclass[]{elsarticle}
+
+\usepackage{url}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{csquotes}
+
+\lstset{frame=lines,framesep=3pt,numbers=left,numberblanklines=false,basicstyle=\ttfamily\small}
+
+\include{macro}
+
+\begin{document}
+
+\title{Algorithm Selection Library: Format Specification\newline \newline \today}
+
+
+%core group, cooperators; alphabatically ordered
+
+\address[dortmund]{University of Dortmund; Germany}
+\address[cork]{Cork Constraint Computation Centre, Ireland}
+\address[freiburg]{University of Freiburg, Germany}
+\address[vancouver]{University of British Columbia, Vancouver, Canada}
+\address[muenster]{University of M\"unster; Germany}
+\address[paderborn]{University of Paderborn, Germany}
+\address[tue]{Eindhoven University of Technology, The Netherlands}
+
+\author[dortmund]{Bernd Bischl}
+\ead{bischl@statistik.tu-dortmund.de}
+
+\author[cork]{Lars Kotthoff}
+\ead{larsko@4c.ucc.ie}
+
+\author[freiburg]{Marius Lindauer}
+\ead{manju@cs.uni-potsdam.de}
+
+\author[cork]{Yuri Malitsky}
+\ead{y.malitsky@4c.ucc.ie}
+
+%%%%%%%%%%%%%%%%%
+
+\author[vancouver]{Alexandre Frech\'{e}tte} % (?) - helped to reformat the satzilla data
+\ead{afrechet@cs.ubc.ca}
+
+\author[vancouver]{Holger Hoos} % discussion about specification
+\ead{hoos@cs.ubc.ca}
+
+\author[freiburg]{Frank Hutter} % discussion about specification
+\ead{fh@informatik.uni-freiburg.de}
+
+\author[muenster]{Pascal Kerschke} % eda
+\ead{kerschke@uni-muenster.de}
+
+\author[vancouver]{Kevin Leyton-Brown} % ???
+\ead{kevinlb@cs.ubc.ca}
+
+\author[paderborn]{Kevin Tierney} % discussion about specification - maybe data set
+\ead{tierney@dsor.de}
+
+\author[tue]{Joaquin Vanschoren} % related work and data set about ml
+\ead{j.vanschoren@tue.nl}
+
+%\begin{abstract}
+
+%\end{abstract}
+% 
+% \begin{keyword}
+% algorithm selection \sep \ldots
+% \end{keyword}
+
+\maketitle
+
+%\input{introduction}
+\input{specification}
+%\input{experiments}
+\bibliographystyle{natbib}
+\bibliography{local}
+
+\end{document}
