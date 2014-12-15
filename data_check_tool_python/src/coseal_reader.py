@@ -258,9 +258,12 @@ class CosealReader(object):
         '''
         Printer.print_c("Read %s" %(file_))
         
-        fp = open(file_,"rb")
-        arff_dict = arff.load(fp)
-        fp.close()
+        with open(file_,"rb") as fp:
+            try:
+                arff_dict = arff.load(fp)
+            except arff.BadNominalValue:
+                Printer.print_e("Parsing of arff file failed (%s) - maybe conflict of header and data." %(file_))
+        
         
         if arff_dict["attributes"][0][0] != "instance_id":
             Printer.print_e("instance_id as first attribute is missing in %s" %(file_))
@@ -323,9 +326,11 @@ class CosealReader(object):
         '''
         Printer.print_c("Read %s" %(file_))
         
-        fp = open(file_,"rb")
-        arff_dict = arff.load(fp)
-        fp.close()
+        with open(file_,"rb") as fp:
+            try:
+                arff_dict = arff.load(fp)
+            except arff.BadNominalValue:
+                Printer.print_e("Parsing of arff file failed (%s) - maybe conflict of header and data." %(file_))
         
         if arff_dict["attributes"][0][0] != "instance_id":
             Printer.print_e("\"instance_id\" as first attribute is missing in %s" %(file_))
@@ -372,9 +377,11 @@ class CosealReader(object):
         
         Printer.print_c("Read %s" %(file_))
         
-        fp = open(file_,"rb")
-        arff_dict = arff.load(fp)
-        fp.close()
+        with open(file_,"rb") as fp:
+            try:
+                arff_dict = arff.load(fp)
+            except arff.BadNominalValue:
+                Printer.print_e("Parsing of arff file failed (%s) - maybe conflict of header and data." %(file_))
         
         if arff_dict["attributes"][0][0] != "instance_id":
             Printer.print_e("instance_id as first attribute is missing in %s" %(file_))
@@ -432,9 +439,11 @@ class CosealReader(object):
         '''
         Printer.print_c("Read %s" %(file_))
         
-        fp = open(file_,"rb")
-        arff_dict = arff.load(fp)
-        fp.close()
+        with open(file_,"rb") as fp:
+            try:
+                arff_dict = arff.load(fp)
+            except arff.BadNominalValue:
+                Printer.print_e("Parsing of arff file failed (%s) - maybe conflict of header and data." %(file_))
         
         if arff_dict["attributes"][0][0] != "instance_id":
             Printer.print_e("instance_id as first attribute is missing in %s" %(file_))
@@ -488,9 +497,11 @@ class CosealReader(object):
         
         Printer.print_c("Read %s" %(file_))
         
-        fp = open(file_,"rb")
-        arff_dict = arff.load(fp)
-        fp.close()
+        with open(file_,"rb") as fp:
+            try:
+                arff_dict = arff.load(fp)
+            except arff.BadNominalValue:
+                Printer.print_e("Parsing of arff file failed (%s) - maybe conflict of header and data." %(file_))
         
         if arff_dict["attributes"][0][0] != "instance_id":
             Printer.print_e("instance_id as first attribute is missing in %s" %(file_))
@@ -530,9 +541,11 @@ class CosealReader(object):
         Printer.print_c("Read %s" %(file_))
         self.metainfo.cv_given = True
         
-        fp = open(file_,"rb")
-        arff_dict = arff.load(fp)
-        fp.close()
+        with open(file_,"rb") as fp:
+            try:
+                arff_dict = arff.load(fp)
+            except arff.BadNominalValue:
+                Printer.print_e("Parsing of arff file failed (%s) - maybe conflict of header and data." %(file_))
         
         if arff_dict["attributes"][0][0] != "instance_id":
             Printer.print_e("instance_id as first attribute is missing in %s" %(file_))
