@@ -35,7 +35,7 @@ class CSVEvalution(object):
         '''
         parser = argparse.ArgumentParser(usage="python merge_results.py --dir <Scenario> <selector_1>.csv <selector_2>.csv ...")
         parser.add_argument("--dir",dest="dir_", required=True, help="directory path with ASlib Scenario")
-        parser.add_argument("--verbose", choices=["INFO", "DEBUG"])
+        parser.add_argument("--verbose", choices=["INFO", "DEBUG"], default="INFO")
         
         args_, misc = parser.parse_known_args(sys.argv[1:])
         
