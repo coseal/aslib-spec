@@ -517,7 +517,7 @@ class CosealReader(object):
 
             inst_ = self.instances.get(inst_name)
             if not inst_:
-                Printer.print_w("Instance \"%s\" has ground truths but was not found in performance file")
+                Printer.print_w("Instance \"%s\" has ground truths but was not found in performance file" %(inst_name))
                 continue
             
             truth_dict = dict((truth_name[0], self.metainfo.ground_truths[truth_name[0]].index(truth_value) if truth_value else -1)\
