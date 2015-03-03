@@ -520,8 +520,13 @@ class CosealReader(object):
                 Printer.print_w("Instance \"%s\" has ground truths but was not found in performance file" %(inst_name))
                 continue
             
-            truth_dict = dict((truth_name[0], self.metainfo.ground_truths[truth_name[0]].index(truth_value) if truth_value else -1)\
-                               for truth_name, truth_value in zip(arff_dict["attributes"][1:], truth))
+            truth_dict = {}
+            for truth_name, truth_value in zip(arff_dict["attributes"][1:], truth):
+                if type(truth_name[1]) is list:
+                    truth_dict[truth_name[0]] = self.metainfo.ground_truths[truth_name[0]].index(truth_value) if truth_value else -1
+                else:
+                    truth_dict[truth_name[0]] = truth_value
+
             inst_._ground_truth = truth_dict
                 
             if inst_name in insts:
