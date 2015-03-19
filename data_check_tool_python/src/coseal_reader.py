@@ -228,7 +228,12 @@ class CosealReader(object):
         if not self.metainfo.feature_group_dict:
             Printer.print_e("Have not found any feature step")
         if not self.metainfo.feature_steps:
-            Printer.print_e("Have not found default feature step")            
+            Printer.print_e("Have not found default feature step")   
+            
+        if self.metainfo.feature_steps:
+            f_groups = set(self.metainfo.feature_group_dict.keys())
+            if set(self.metainfo.feature_steps).difference(f_groups):
+                Printer.print_e("Default feature steps are not listed (%s)" %(set(self.metainfo.feature_steps).difference(f_groups)))   
            
         feature_intersec = set(self.metainfo.features_deterministic).intersection(self.metainfo.features_stochastic)
         if feature_intersec:
