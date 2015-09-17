@@ -72,26 +72,24 @@ files or for circumventing format specifications!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{description.txt}
 
-A global description file containing general information about the scenario. This is one of the few files which is not an 
-ARFF, but for machine readability it follows specific guidelines for its generation. Each line contains very specific
-bits of information. Each item in the list that follows specifies the format of the corresponding line. As such, it first 
-presents the line format followed by an explanation. The two parts are separated by a colon.
+A global description file containing general information about the scenario in
+YAML format.
 
 \begin{itemize}
 	\item scenario\_id [string]: Name of the scenario\\ 
 		This id is necessary for human bookkeeping and making sure that all
 		other files in the directory are for the same set of experiments. In the ARFF files, this id will be present 
 		under the ``@RELATION'' line.
-  	\item performance\_measures [comma-separated list of strings]: Name of performance metrics measured for 
+  	\item performance\_measures [list of strings]: Name of performance metrics measured for 
 		the algorithms\\
 		While in many cases only a single entry might be reasonable, there are times when an 
 		experiment may yield secondary objectives. As such, all these measures must be listed in decreasing 
 		order of importance, if there is such an order, the first one being the one of primary interest.
-  	\item maximize [comma-separated list of Booleans]: true / false\\ 
+  	\item maximize [list of Booleans]: true / false\\ 
   	    For each of the objectives listed in the \textit{performance\_measures} line,
 		this line specifies if the objective is to minimize or maximize the corresponding value. The number of entries 
 		must match number of entries in \stringval{performance\_measures}.
-  	\item performance\_type [comma-separated list of factors]: runtime / solution\_quality
+  	\item performance\_type [list of factors]: runtime / solution\_quality
   	    For each of the objectives listed for \stringval{performance\_measures},
 		this line specifies whether the corresponding metric is\stringval{runtime} 
 		or \stringval{solution\_quality}. Number of entries must match number of entries in 
@@ -112,52 +110,75 @@ presents the line format followed by an explanation. The two parts are separated
   	    \\Feature set computation is terminated if 
 		memory exceeded this value. Might be used both for \stringval{runtime} and \stringval{solution\_quality}. Put 
 		\qm if it was not set for experiment. 
-    \item algorithms\_deterministic: [comma-separated list of strings]\\
+    \item algorithms\_deterministic [list of strings]:\\
           List names of all algorithms which are deterministic.
-    \item algorithms\_stochastic: [comma-separated list of strings]\\
+    \item algorithms\_stochastic [list of strings]:\\
           List names of all algorithms which are stochastic.
-    \item The next lines allow to define dependencies of features to processing steps. 
+    \item number\_of\_feature\_steps [integer]: Number of feature steps.\\
+    \item feature\_steps [list of objects describing feature steps]:\\
+       Objects specifying the feature step name, the features it provides, and
+       any dependencies on other feature steps. 
     	   For instance, probing features need normally a preprocessing step. 
     	   Therefore probing features depend on the preprocessing step and the probing step.
     	   This is helpful for \filename{feature\_costs.arff}, as feature
            generators often calculate features in several steps. 
-      	   The first line should define the number of steps 
-		   that are to be listed. 
 		   Each feature has to be listed in at least one step.
-		   To be able to use a feature, all processing steps have to be used in which the feature is listed.
-		   On the other hand, if $S' \subseteq S$ processing steps are used and we have a set of features $F(S)$ listed in $S$,
-		   you are able to use features $F' = F(S) \backslash F(S \backslash S')$, \ie{} features that are not listed in not used steps.   
-		   The steps have to be sorted according to their execution sequence.
-		   Their definition looks like this:\\
-           		$\-\hspace{1cm}$ number\_of\_feature\_steps: 2\\
-  	      		$\-\hspace{1cm}$ feature\_step name\_1: feature1, feature2, feature4\\
-  	      		$\-\hspace{1cm}$ feature\_step name\_2: feature3, feature4\\
+		   To be able to use a feature, all feature steps have to be used which
+           are listed in the feature step's requires section.
+		   The definition looks like this:\\
+  	      		$\-\hspace{1cm}$ name\_1:\\
+  	      		$\-\hspace{2cm}$ provides:\\
+  	      		$\-\hspace{3cm}$ - feature1\\
+  	      		$\-\hspace{3cm}$ - feature2\\
+  	      		$\-\hspace{3cm}$ - feature4\\
+  	      		$\-\hspace{1cm}$ name\_2:\\
+  	      		$\-\hspace{2cm}$ requires:\\
+  	      		$\-\hspace{3cm}$ - name\_1\\
+  	      		$\-\hspace{2cm}$ provides:\\
+  	      		$\-\hspace{3cm}$ - feature3\\
               	You are free to use any step names you like, 
               	as long as they are unique and do not contain illegal characters.
-    \item default\_steps: [comma-separated list of strings]\\
+    \item default\_steps [list of strings]:\\
     	  List names of all features which should be used as a default.
-    \item features\_deterministic: [comma-separated list of strings]\\
+    \item features\_deterministic [list of strings]:\\
     	  List names of all features processing steps which are deterministic.
-    \item features\_stochastic: [comma-separated list of strings]\\
+    \item features\_stochastic [list of strings]:\\
           List names of all features which are stochastic. 
 \end{itemize}
 
 \begin{lstlisting}[caption=Example description.txt]
 scenario_id: 2013-SAT-Competition
-performance_measures: PAR10, Number_of_satisfied_clauses
-maximize: false, true
-performance_type: runtime, solution_quality
+performance_measures:
+    - PAR10
+    - Number_of_satisfied_clauses
+maximize:
+    - false
+    - true
+performance_type: 
+    - runtime
+    - solution_quality
 algorithm_cutoff_time: 900
 algorithm_cutoff_memory: 6000
 features_cutoff_time: 90
 features_cutoff_memory: 6000
-algorithms_deterministic: lingeling, clasp
+algorithms_deterministic:
+    - lingeling
+    - clasp
 algorithms_stochastic: sparrow
 number_of_feature_steps: 2
-feature_step preprocessing: number_of_variables, first_local_min_steps
-feature_step local_search_probing: first_local_min_steps
+feature_steps:
+    preprocessing:
+        provides: 
+            - number_of_variables
+    local_search_probing:
+        requires:
+            - preprocessing
+        provides:
+            - first_local_min_steps
 default_steps: preprocessing
-features_deterministic: number_of_variables, first_local_min_steps
+features_deterministic:
+    - number_of_variables
+    - first_local_min_steps
 features_stochastic: first_local_min_steps
 \end{lstlisting}
 
