@@ -112,7 +112,7 @@ def generate_scenario(runtime_fn, features_fn, cutoff):
         arff.dump(fs_data, fp)
     
     with open("description.txt", "w") as fp:
-        yaml.dump(description, fp)
+        yaml.dump(description, fp, default_flow_style=False)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
