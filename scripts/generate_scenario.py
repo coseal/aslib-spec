@@ -19,7 +19,7 @@ def generate_scenario(runtime_fn, features_fn, cutoff):
     
     description = {"scenario_id": "UNKNOWN",
                    "performance_measures": ["runtime"],
-                   "maximize": ["false"],
+                   "maximize": [False],
                    "performance_type": ["runtime"], 
                    "algorithm_cutoff_time": cutoff,
                    "algorithm_cutoff_memory": "?",
