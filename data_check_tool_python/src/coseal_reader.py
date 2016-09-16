@@ -253,13 +253,12 @@ class CosealReader(object):
         if arff_dict["attributes"][2][0] != "algorithm":
             Printer.print_e("algorithm as third attribute is missing in %s" %(file_))
             
-        i = 0
-        for performance_measure in self.metainfo.performance_measure:                       
-            if arff_dict["attributes"][3 + i][0] != performance_measure:
-                Printer.print_e("\"%s\" as attribute is missing in %s" %(performance_measure, file_))
-            i += 1
+        listed_metrics = map(lambda x: x[0], arff_dict["attributes"][3 : 3 + len(self.metainfo.performance_measure)])
+        diff_set = set(self.metainfo.performance_measure).difference(listed_metrics)
+        if diff_set:
+            Printer.print_e("\"%s\" as attribute is missing in %s" %(diff_set, file_))
         
-        if arff_dict["attributes"][3 + i][0] != "runstatus":
+        if arff_dict["attributes"][-1][0] != "runstatus":
             Printer.print_e("runstatus as last attribute is missing in %s" %(file_))
                
         pairs_inst_rep_alg = []
