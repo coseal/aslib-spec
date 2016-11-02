@@ -136,13 +136,15 @@ scenario in YAML format.
 -   `features_stochastic [list of strings]`:
     List names of all features which are stochastic.
 -   `metainfo_algorithms`:
-    lists all algorithms and provides meta information. Mandatory fields for each algorithm are:
+    lists all algorithms and provides meta information. The name of an algorithm should have at most 15 characters. **Mandatory** fields for each algorithm are:
     - `configuration [string]`: parameter configuration, potential empty string
     - `deterministic [boolean]`: indicates whether the algorithm is deterministic (`true`) or stochastic (`false`)
-    Further optional fields can be:
+    **Optional fields** can be but are not limited to:
     - `version`
     - `call_string`
     - `textual description`
+    
+    
     
 
 **Example:**
