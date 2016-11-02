@@ -41,7 +41,7 @@ Please keep the following in mind when generating the files.
     Never use anything else except for missing values.
 -   relations of all -files should begin with the information type and
     end with scenario_id (see ); e.g., if we have instance features of
-    the $2013$ SAT Competition, the relation name of the should be
+    the 2013 SAT Competition, the relation name of the should be
     `@RELATION FEATURE_VALUES_2013-SAT-Competition`. In case of doubt,
     this helps to identify files which belong together
 
@@ -140,6 +140,7 @@ scenario in YAML format.
 -   `features_stochastic [list of strings]`:
     List names of all features which are stochastic.
 
+**Example:**
 ```
 scenario_id: 2013-SAT-Competition
 performance_measures:
@@ -189,41 +190,33 @@ here should follow the conventions of an ARFF file. It is therefore
 expected that the rows will correspond to a specific (instance,
 repetition) pair.
 
--   The first column is called and contains the instance name
+-   The first column is called `instance_id` and contains the instance name
     represented as a string. These names must follow the guidelines of
     utilizing only ASCII characters.
-
--   The second column specifies the and contains integers, starting at 1
+-   The second column specifies the `repetition` and contains integers, starting at 1
     and increasing in increments of 1 for each instance with the
     same name.
-
 -   The following columns correspond to instance features. We allow
     numeric, integer and categorical columns, but only the names defined
-    in can be used. In that file, these names were specified in fields .
-
+    in `description.txt` can be used. In that file, these names were specified in fields `features_step`.
 -   means the feature value is missing because the feature calculation
     algorithm crashed or aborted or some other problem occurred. The
-    explanation of such a missing value will need to be registered in .
-
+    explanation of such a missing value will need to be registered in `feature_runstatus.arff`.
 -   In the case of stochastic features, the user might opt to repeat the
-    feature calculation (column ). The following remarks have to be
+    feature calculation (column `repetition`). The following remarks have to be
     respected:
-
     -   In case of no repetitions, do not omit the column, simply put a
-        $1$ in every entry.
-
+        1 in every entry.
     -   If you use repetitions, you can use a different number of
         repetitions for instances (if you really insist on it), but
         always the same number of repetitions for features in one row
         (the latter is enforced by the format definition).
-
     -   If you use repetitions, but some features are deterministic,
         simply repeat their feature values across the repetitions.
-
     -   Whether features are stochastic or deterministic is defined
-        implicit over the feature steps in and in in .
+        implicit over the feature steps in `features_steps_deterministic` and `features_steps_stochastic` in in `description.txt`.
 
-
+**Example:**
 ```
 @RELATION FEATURE_VALUES_2013-SAT-Competition
 
@@ -250,53 +243,41 @@ This file contains technical information about the feature calculation
 in general. Specifically, it serves to state whether the execution of
 feature processing steps was successful or if some crash occurred. The
 file is designed to allow the user to specify what kind of a crash has
-transpired, but the reasons for each such situation must be explained in
-the file.
+transpired, but the reasons for each such situation must be explained in 
+the file `readme.txt`.
 
 We assume that feature processing steps are able to generate features if
 its execution terminates successfully. If a step terminates because of
-another reason, timeout or memout, all features are not available which
-depend on this processing step as defined in .
+another reason, e.g., timeout or memout, all features are not available which
+depend on this processing step as defined in `description.txt`.
 
--   The first column is the and contains the instance name in
+-   The first column is the and contains the instance name in `instance_id`
     string format. These names must follow the guidelines of utilizing
     only ASCII characters.
-
--   The second column specifies the and contains integers, starting at
-    $1$ and increasing in increments of $1$ for each instance with the
+-   The second column specifies the `repetition` and contains integers, starting at
+    1 and increasing in increments of 1 for each instance with the
     same name.
-
--   The two columns, and , must represent exactly the same data as
-    presented in .
-
+-   The two columns `instance_id` and `repetition` must represent exactly the same data as
+    presented in `feature_values.arff`.
 -   All remaining columns correspond to feature processing steps. Here,
-    the same column names must be adhered to as was defined in . The
+    the same column names must be adhered to as was defined in `description.txt`. The
     entries are categoric values specifying the termination condition
     for each step. The supported range of these values is:
-
-    -   - The step was executed normally.
-
-    -   - Time ran out before this step terminated.
-
-    -   - Feature computation ran out of memory causing a crash.
-
-    -   - Instance was solved during feature computation.
-
-    -   - The program failed to execute.
-
-    -   - Feature computation was not run, probably because an earlier
+    -   `ok`: The step was executed normally.
+    -   `timeout`: Time ran out before this step terminated.
+    -   `memout`: Feature computation ran out of memory causing a crash.
+    -   `presolved`: Instance was solved during feature computation.
+    -   `crash`: The program failed to execute.
+    -   `unknown`: Feature computation was not run, probably because an earlier
         feature computation step presolved the instance.
-
-    -   - Some other critical problem occurred while this feature
+    -   `other`: Some other critical problem occurred while this feature
         was computed.
-
--   If feature calculation is aborted ( or ), you must explain the
-    reasons in the .
-
--   If at least one used steps has the state , the instance was solved
+-   If feature calculation is aborted (`crash` or `other`), you must explain the
+    reasons in the `readme.txt`.
+-   If at least one used steps has the state `presolved`, the instance was solved
     during feature set calculation.
 
-
+**Example:**
 ```
 @RELATION FEATURE_RUNSTATUS_2013-SAT-Competition
 
@@ -326,30 +307,29 @@ processing step.
 We strongly recommend to provide information about feature costs.
 However, you are allowed to omit this file if your scenario does not
 entail feature costs or you have absolutely no knowledge of them. Please
-note that certain analysis, runtime improvement against best single
+note that certain analysis, e.g., runtime improvement against best single
 algorithm, are not possible, if feature costs are not provided.
 
--   The first column is the and contains the instance name represented
-    as a string. These names must follow the guidelines of utilizing
-    only ASCII characters
-
--   The second column is an integer specifying the , starting at $1$ and
-    increasing in increments of $1$ per each instance repetition.
-
--   The and columns must represent exactly the same data as in .
-
+-   The first column is the and contains the instance name in `instance_id`
+    string format. These names must follow the guidelines of utilizing
+    only ASCII characters.
+-   The second column specifies the `repetition` and contains integers, starting at
+    1 and increasing in increments of 1 for each instance with the
+    same name.
+-   The two columns `instance_id` and `repetition` must represent exactly the same data as
+    presented in `feature_values.arff`.
 -   All columns correspond to the costs of each feature
     processing steps. The names of these steps must be exactly the same
-    as those specified in in the feature step section. Entries are
+    as those specified in `description.txt` in the feature step section. Entries are
     numerical, they specify the cost of the processing step for that
     instance / repetition. We recommend to specify a feature processing
     step for each feature, if the costs for each feature is known. If
     only the computation cost for all features is known, specify exactly
     one processing step.
-
--   Put as an entry if the feature computation was not successful due to
+-   Put `?` as an entry if the feature computation was not successful due to
     cut-off or unusual abort.
 
+**Example:**
 ```
 @RELATION FEATURE_COSTS_2013-SAT-Competition
 
@@ -384,52 +364,41 @@ repetitions used for stochastic features.
 
 -   Each row corresponds to the measurement of 1 algorithm on one
     instance / repetition.
-
--   The first column is the and contains the instance name as a string.
-
--   The second column is an integer that states the , starting at $1$
-    and increasing in increments of $1$ per each instance repetition.
+-   The first column is the and contains the instance name in `instance_id`
+    string format. These names must follow the guidelines of utilizing
+    only ASCII characters.
+-   The second column specifies the `repetition` and contains integers, starting at
+    1 and increasing in increments of 1 for each pair of algorithm and instance.
     The number of repetitions can vary between the algorithms, e.g., the
     performance of deterministic algorithms are only measured once and
     of stochastic ones more than once. However, the combination of
     algorithm and number of repetition should be the same for
     all instances.
-
--   must contain exactly the same elements as the corresponding column
-    in .
-
--   The third column is called , a string value specifying the name of
-    the evaluated algorithm. Only the names defined in may be used;
-    those listed under the fields and .
-
+-   `instance_id` must contain exactly the same elements as the corresponding column
+    in `feature_values.arff`.
+-   The third column is called `algorithm`, a string value specifying the name of
+    the evaluated algorithm. Only the names defined in `description.txt` may be used;
+    those listed under the fields `algorithms_deterministic` and `algorithms_stochastic`.
 -   All but the last subsequent columns are numerical, containing the
     algorithm performance measurements.
-
--   The last column is called and contains whether the algorithm
+-   The last column is called `runstatus` and contains whether the algorithm
     terminated normally or the reason for an abort.
-
-    -   - The algorithm finished properly.
-
-    -   - Time ran out prior to completion.
-
-    -   - The algorithm required more memory than permitted.
-
-    -   - This algorithm can’t be run on this instance.
-
-    -   - The program failed to execute.
-
-    -   - Something really unexpected happened.
-
--   If the run was aborted ( or ), you have to explain the reasons in
-    the .
-
--   are not permitted in this file. In case of scenarios with runtime as
+    -   `ok`: The algorithm finished properly.
+    -   `timeout`: Time ran out prior to completion.
+    -   `memout`: The algorithm required more memory than permitted.
+    -   `not_applicable`: This algorithm can’t be run on this instance.
+    -   `crash`: The program failed to execute.
+    -   `other`: Something really unexpected happened.
+-   If the run was aborted (`crash` or `other`), you have to explain the reasons in
+    the `readme.txt`.
+-   `?` are not permitted in this file. In case of scenarios with runtime as
     performance type, the runtime is always known regardless of
     the runstatus. In case of scenarios with solution quality as
     performance type, missing values have to be imputed somehow.
     However, this imputation is domain-specific and hence, it has to be
     provided by the scenario designer.
 
+**Example:**
 ```
 @RELATION ALGORITHM_RUNS_2013-SAT-Competition
 
@@ -463,20 +432,19 @@ a single cross-validation is simply repeated. These repetitions are a
 standard technique for smaller data sets or in cases where other sources
 of instability might be present in the data.
 
--   The first column is the and contains the instance name as a string.
+-   The first column is the `instance_id` and contains the instance name as a string.
     The column must contain exactly the same elements as the
-    corresponding column in at least once.
-
--   The second column is an integer that states the , starting at $1$
-    and increasing in increments of $1$ per each instance repetition.
+    corresponding column in `feature_values.arff` at least once.
+-   The second column is an integer that states the `repetition`, starting at 1
+    and increasing in increments of 1 per each instance repetition.
     Note that this is for repeated cross-validation and has no
     connection to repeated algorithm runs or repeated
     feature evaluations. The column is always present, for a simple
-    cross-validation it is always $1$.
-
--   The third column is an integer that states the of the
-    cross-validation, starting at $1$.
-
+    cross-validation it is always 1.
+-   The third column is an integer that states the `fold` of the
+    cross-validation, starting at 1.
+    
+**Example:**
 ```
 @RELATION CV_2013-SAT-Competition
 
@@ -505,25 +473,17 @@ cases where a new evaluation metric depends on the optimal solution.
 Each row specifies exactly one instance, and no duplicates are allowed.
 
 -   Rows correspond to instances.
-
--   First column is called and contains a string representing the
-    instance name.
-
--   The column has exactly the same data as in .
-
+-   The first column is the `instance_id` and contains the instance name as a string.
+-   The column has exactly the same data as in `feature_values.arff`.
 -   The other columns provide information about ground truths of each
-    instance,
-
+    instance, e.g.
     -   Satisfiable or Unsatisfiable for SAT instances.
-
     -   Optimal quality of optimization problems.
-
     -   Any other known optimal value of a metric.
-
--   Put if you do not know the ground truth for a particular instance.
-
+-   Put `?` if you do not know the ground truth for a particular instance.
 -   Omit this file if you do not have this information for any instance.
 
+**Example:**
 ```
 @RELATION GROUND_TRUTH_2013-SAT-Competition
 
