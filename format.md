@@ -3,30 +3,21 @@ Directory / File Layout
 
 -   Every algorithm selection scenario is stored in an individual folder
     on the server.
-
 -   The folder contains at most one copy of the following, optional
     files are marked with an (\*)
 
-    -   : Human-readable with general information.
-
-    -   : Global definitions for the scenario.
-
-    -   : Values of features used to predict solvers.
-
-    -   : Technical info about features, aborts.
-
-    -   ($^*$): Costs of feature (step) calculation.
-
-    -   : Algorithm runs and performance measurements.
-
-    -   ($^*$): Cross-validation splits for evaluation. Users are
+    -   Human-readable with general information.
+    -   Global definitions for the scenario.
+    -   Values of features used to predict solvers.
+    -   Technical info about features, aborts.
+    -   Costs of feature (step) calculation.*
+    -   Algorithm runs and performance measurements.
+    -   Cross-validation splits for evaluation. Users are
         allowed to (if they have good reason) to submit this file, but
         in general it will be generated on the repository server
-        automatically, when the rest of the data set is submitted.
-
-    -   ($^*$): Information about solution of instances.
-
-    -   ($^*$): Citation file for data set.
+        automatically, when the rest of the data set is submitted.*
+    -   Information about solution of instances.*
+    -   Citation file for data set.*
 
 General Remarks
 ===============
@@ -36,25 +27,20 @@ Please keep the following in mind when generating the files.
 -   Every file base name / column name / factor level name adheres to:
     ASCII characters; if whitespaces or commas are used, the name has to
     be quoted
-
--   Instance IDs can also contain “`/`” to represent an original
+-   Instance IDs can also contain `/` to represent an original
     file path.
-
 -   We **highly** recommend using descriptive instance names rather than
     using numerical IDs. One possible purpose for this is that such
     descriptive instance names can later be used to
     reproduce experiments.
-
 -   All pairs of instance ID and repetition number have to be unique.
-
 -   Use to denote missing values conforming to the rules of the
     ARFF mechanism. Each such must be explained in the making it clear
     why the missing values occurred where they did. Also, use the
     “runstatus” concept, explained below, for features and algorithms.
     Never use anything else except for missing values.
-
 -   relations of all -files should begin with the information type and
-    end with scenario\_id (see ); e.g., if we have instance features of
+    end with scenario_id (see ); e.g., if we have instance features of
     the $2013$ SAT Competition, the relation name of the should be
     `@RELATION FEATURE_VALUES_2013-SAT-Competition`. In case of doubt,
     this helps to identify files which belong together
@@ -72,15 +58,11 @@ perfectly machine-readable information in the other files or for
 circumventing format specifications!
 
 -   Must describe where and how the data originated.
-
 -   Describe the problem that the algorithms are supposed to solve and
     how their performance is measured.
-
 -   Describe the used solvers, their configurations, versions
     and origins.
-
 -   Reference the feature generator.
-
 -   Try to include all relevant details of the underlying experiment.
 
 description.txt
@@ -89,61 +71,50 @@ description.txt
 A global description file containing general information about the
 scenario in YAML format.
 
--   scenario\_id \[string\]: Name of the scenario\
+-   `scenario_id [string]`: Name of the scenario -- 
     This id is necessary for human bookkeeping and making sure that all
     other files in the directory are for the same set of experiments. In
     the ARFF files, this id will be present under the “@RELATION” line.
-
--   performance\_measures \[list of strings\]: Name of performance
-    metrics measured for the algorithms\
+-   `performance_measures [list of strings]`: Name of performance
+    metrics measured for the algorithms -- 
     While in many cases only a single entry might be reasonable, there
     are times when an experiment may yield secondary objectives. As
     such, all these measures must be listed in decreasing order of
     importance, if there is such an order, the first one being the one
     of primary interest.
-
--   maximize \[list of Booleans\]: true / false\
-    For each of the objectives listed in the *performance\_measures*
+-   `maximize [list of Booleans]`: true / false --
+    For each of the objectives listed in the *performance_measures*
     line, this line specifies if the objective is to minimize or
     maximize the corresponding value. The number of entries must match
     number of entries in .
-
--   performance\_type \[list of factors\]: runtime / solution\_quality
-    For each of the objectives listed for , this line specifies whether
-    the corresponding metric is or . Number of entries must match number
-    of entries in .
-
--   algorithm\_cutoff\_time \[integer\]: Cut-off time in seconds\
+-   `performance_type [list of factors]`: runtime / solution_quality -- 
+    For each of the objectives listed for `performance_measures`, this line specifies whether
+    the corresponding metric is `runtime` or `solution_quality`. Number of entries must match number
+    of entries in `performance_measures`.
+-   `algorithm_cutoff_time [integer]`: Cut-off time in seconds --
     Algorithms are terminated after this time if they did not produce a
-    successful solution. Might be used both for and . Put if it was not
+    successful solution. Might be used both for `runtime` and `solution_quality`. Put `?` if it was not
     set for experiment.
-
--   algorithm\_cutoff\_memory \[integer\]: Cut-off memory in megabytes\
+-   `algorithm_cutoff_memory [integer]`: Cut-off memory in megabytes -- 
     Algorithms are terminated if their memory exceeded this value. Might
-    be used both for and . Put if it was not set for experiment.
-
--   features\_cutoff\_time \[integer\]: Cut-off time in seconds\
+    be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
+-   `features_cutoff_time [integer]`: Cut-off time in seconds --
     Feature set computation is terminated if it exceeds this time. Might
-    be used both for and . Put if it was not set for experiment.
-
--   features\_cutoff\_memory \[integer\]: Cut-off memory in megabytes\
+    be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
+-   `features_cutoff_memory [integer]`: Cut-off memory in megabytes -- 
     Feature set computation is terminated if memory exceeded this value.
-    Might be used both for and . Put if it was not set for experiment.
-
--   algorithms\_deterministic \[list of strings\]:\
+    Might be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
+-   `algorithms_deterministic [list of strings]`:
     List names of all algorithms which are deterministic.
-
--   algorithms\_stochastic \[list of strings\]:\
+-   `algorithms_stochastic [list of strings]`:
     List names of all algorithms which are stochastic.
-
--   number\_of\_feature\_steps \[integer\]: Number of feature steps.\
-
--   feature\_steps \[list of objects describing feature steps\]:\
+-   `number_of_feature_steps [integer]`: Number of feature steps.
+-   `feature_steps [list of objects describing feature steps]:`
     Objects specifying the feature step name, the features it provides,
     and any dependencies on other feature steps. For instance, probing
     features need normally a preprocessing step. Therefore probing
     features depend on the preprocessing step and the probing step. This
-    is helpful for , as feature generators often calculate features in
+    is helpful for `feature_costs.arff`, as feature generators often calculate features in
     several steps. Each feature has to be listed in at least one step.
     To be able to use a feature, all feature steps have to be used which
     are listed in the feature step’s requires section. The definition
@@ -162,14 +133,11 @@ scenario in YAML format.
     ```
     You are free to use any step names you like, as long as they are
     unique and do not contain illegal characters.
-
--   default\_steps \[list of strings\]:\
+-   `default_steps [list of strings]`:
     List names of all features which should be used as a default.
-
--   features\_deterministic \[list of strings\]:\
+-   `features_deterministic [list of strings]`:
     List names of all features processing steps which are deterministic.
-
--   features\_stochastic \[list of strings\]:\
+-   `features_stochastic [list of strings]`:
     List names of all features which are stochastic.
 
 ```
@@ -210,7 +178,7 @@ features_deterministic:
 features_stochastic: first_local_min_steps
 ```
 
-feature\_values.arff
+feature_values.arff
 ====================
 
 This file contains the numerical feature values for all instances.
@@ -275,7 +243,7 @@ inst3.cnf,2,1002,337,?
 ...
 ```
 
-feature\_runstatus.arff
+feature_runstatus.arff
 =======================
 
 This file contains technical information about the feature calculation
@@ -347,7 +315,7 @@ inst3.cnf,2,ok,presolved
 ...
 ```
 
-feature\_costs.arff
+feature_costs.arff
 ===================
 
 Although usually a minor overhead, feature computation is rarely free.
@@ -400,7 +368,7 @@ inst3.cnf,2,1.1,?
 ...
 ```
 
-algorithm\_runs.arff
+algorithm_runs.arff
 ====================
 
 This file contains information on all algorithms evaluated on the
@@ -527,7 +495,7 @@ inst4.cnf, 2, 1
 ...
 ```
 
-ground\_truth.arff
+ground_truth.arff
 ==================
 
 This is an optional file meant to keep the known information about the
