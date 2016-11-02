@@ -104,10 +104,6 @@ scenario in YAML format.
 -   `features_cutoff_memory [integer]`: Cut-off memory in megabytes -- 
     Feature set computation is terminated if memory exceeded this value.
     Might be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
--   `algorithms_deterministic [list of strings]`:
-    List names of all algorithms which are deterministic.
--   `algorithms_stochastic [list of strings]`:
-    List names of all algorithms which are stochastic.
 -   `number_of_feature_steps [integer]`: Number of feature steps.
 -   `feature_steps [list of objects describing feature steps]:`
     Objects specifying the feature step name, the features it provides,
@@ -139,6 +135,15 @@ scenario in YAML format.
     List names of all features processing steps which are deterministic.
 -   `features_stochastic [list of strings]`:
     List names of all features which are stochastic.
+-   `metainfo_algorithms`:
+    lists all algorithms and provides meta information. Mandatory fields for each algorithm are:
+    - `configuration [string]`: parameter configuration, potential empty string
+    - `deterministic [boolean]`: indicates whether the algorithm is deterministic (`true`) or stochastic (`false`)
+    Further optional fields can be:
+    - `version`
+    - `call_string`
+    - `textual description`
+    
 
 **Example:**
 ```
@@ -156,11 +161,6 @@ algorithm_cutoff_time: 900
 algorithm_cutoff_memory: 6000
 features_cutoff_time: 90
 features_cutoff_memory: 6000
-algorithms_deterministic:
-    - lingeling
-    - clasp
-algorithms_stochastic: 
-    - sparrow
 number_of_feature_steps: 2
 feature_steps:
     preprocessing:
@@ -177,6 +177,18 @@ features_deterministic:
     - number_of_variables
     - first_local_min_steps
 features_stochastic: first_local_min_steps
+metainfo_algorithms:
+  lingeling:
+    configuration: ""
+    version: acq
+    deterministic: true
+  clasp:
+    configuration: --sat-prepro yes
+    version: 2.1.3
+    deterministic: true
+  sparrow:
+    configuration: ""
+    deterministic: false
 ```
 
 feature_values.arff
