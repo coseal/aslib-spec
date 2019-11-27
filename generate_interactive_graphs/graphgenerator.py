@@ -59,8 +59,8 @@ def search_for_ext(path, ext):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--path", required=True, help="path with arff files")
-    parser.add_argument("--save", required=True, help="path to save generated files")
+    parser.add_argument("--path", required=True, default=".", help="directory path with arff files")
+    parser.add_argument("--save", required=True, default=".", help="directory path to save generated files")
     args_ = parser.parse_args()
 
     # get the scenarios to graph
@@ -68,7 +68,6 @@ if __name__ == "__main__":
     data_sources = arff_files
 
     for src in data_sources:
-      print("generating: " + src)
       # make a graph, setup to save
       graph = gr.create_graph(src)
       name = src.replace(".arff", "")

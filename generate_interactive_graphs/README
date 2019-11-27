@@ -1,0 +1,6 @@
+Requirements:
+	* python3
+	* packages: liac-arff, pandas, altair
+
+Usage:
+	see python graphgenerator.py -h
