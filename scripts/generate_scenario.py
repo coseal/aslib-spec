@@ -27,18 +27,27 @@ def generate_scenario(runtime_fn, features_fn, cutoff):
                    "features_cutoff_memory": "?",
                    "algorithms_deterministic": "?", #TODO
                    "algorithms_stochastic": "",
+                   "metainfo_algorithms": {},
                    "features_deterministic": "?", #TODO
                    "features_stochastic": "",
                    "number_of_feature_steps": 1,
                    "feature_steps":{"ALL":{"provides":"?"}}, #TODO
                    "default_steps": ["ALL"]}
+    
+    #default algorithm info
+    algo_info = {"configuration": "",
+                 "deterministic": "true"}
 
     algos = []
     with open(runtime_fn, "r") as fp:
         algos = fp.readline().replace("\n","").split(",")[1:]
         algos = map(lambda x: x.strip("'").replace(" ","_"), algos)
-        description["algorithms_deterministic"] = algos
-
+        
+        algo_infos = {}
+        for algo in algos:
+            algo_infos[algo] = copy.deepcopy(algo_info)
+        description["metainfo_algorithms"] = copy.deepcopy(algo_infos)
+        
         attributes = [ ["instance_id", "STRING"],
                       ["repetition", "NUMERIC"],
                       ["algorithm", "STRING"],
