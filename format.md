@@ -98,11 +98,17 @@ scenario in YAML format.
 -   `algorithm_cutoff_memory [integer]`: Cut-off memory in megabytes -- 
     Algorithms are terminated if their memory exceeded this value. Might
     be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
--   `features_cutoff_time [integer]`: Cut-off time in seconds --
-    Feature set computation is terminated if it exceeds this time. Might
+-   `instance_features_cutoff_time [integer]`: Cut-off time in seconds --
+    Instance feature set computation is terminated if it exceeds this time. Might
     be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
--   `features_cutoff_memory [integer]`: Cut-off memory in megabytes -- 
-    Feature set computation is terminated if memory exceeded this value.
+-   `instance_features_cutoff_memory [integer]`: Cut-off memory in megabytes -- 
+    Instance feature set computation is terminated if memory exceeded this value.
+    Might be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
+-   `algorithm_features_cutoff_time [integer]`: Cut-off time in seconds --
+    Algorithmic feature set computation is terminated if it exceeds this time. Might
+    be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
+-   `algorithm_features_cutoff_memory [integer]`: Cut-off memory in megabytes -- 
+    Algorithmic feature set computation is terminated if memory exceeded this value.
     Might be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
 -   `number_of_feature_steps [integer]`: Number of feature steps.
 -   `feature_steps [list of objects describing feature steps]:`
@@ -110,8 +116,8 @@ scenario in YAML format.
     and any dependencies on other feature steps. For instance, probing
     features need normally a preprocessing step. Therefore probing
     features depend on the preprocessing step and the probing step. This
-    is helpful for `feature_costs.arff`, as feature generators often calculate features in
-    several steps. Each feature has to be listed in at least one step.
+    is helpful for `instance_feature_costs.arff` or `algorithm_feature_costs.arff`, as feature generators 
+		often calculate features in several steps. Each feature has to be listed in at least one step.
     To be able to use a feature, all feature steps have to be used which
     are listed in the feature step’s requires section. The definition
     looks like this:\
@@ -131,10 +137,14 @@ scenario in YAML format.
     unique and do not contain illegal characters.
 -   `default_steps [list of strings]`:
     List names of all features which should be used as a default.
--   `features_deterministic [list of strings]`:
-    List names of all features processing steps which are deterministic.
--   `features_stochastic [list of strings]`:
-    List names of all features which are stochastic.
+-   `instance_features_deterministic [list of strings]`:
+    List names of all instance features processing steps which are deterministic.
+-   `instance_features_stochastic [list of strings]`:
+    List names of all instance features which are stochastic.
+-   `algorithm_features_deterministic [list of strings]`:
+    List names of all algorithmic features processing steps which are deterministic.
+-   `algorithm_features_stochastic [list of strings]`:
+    List names of all algorithmic features which are stochastic.
 -   `metainfo_algorithms`:
     lists all algorithms and provides meta information. The name of an algorithm should have at most 15 characters. **Mandatory** fields for each algorithm are:
     - `configuration [string]`: parameter configuration, potential empty string
@@ -161,9 +171,11 @@ performance_type:
     - solution_quality
 algorithm_cutoff_time: 900
 algorithm_cutoff_memory: 6000
-features_cutoff_time: 90
-features_cutoff_memory: 6000
-number_of_feature_steps: 2
+instance_features_cutoff_time: 100
+instance_features_cutoff_memory: 6000
+algorithm_features_cutoff_time: 90
+algorithm_features_cutoff_memory: 6000
+number_of_feature_steps: 3
 feature_steps:
     preprocessing:
         provides: 
@@ -173,12 +185,19 @@ feature_steps:
             - preprocessing
         provides:
             - first_local_min_steps
+    AST:
+        provides: 
+            - degree_mean 
 default_steps: 
     - preprocessing
-features_deterministic:
+    - AST
+instance_features_deterministic:
     - number_of_variables
     - first_local_min_steps
-features_stochastic: first_local_min_steps
+instance_features_stochastic: first_local_min_steps
+algorithm_features_deterministic:
+    - degree_mean 
+algorithm_features_stochastic: ?
 metainfo_algorithms:
   lingeling:
     configuration: ""
@@ -193,7 +212,7 @@ metainfo_algorithms:
     deterministic: false
 ```
 
-feature_values.arff
+instance_feature_values.arff
 ====================
 
 This file contains the numerical feature values for all instances.
@@ -215,7 +234,7 @@ repetition) pair.
     in `description.txt` can be used. In that file, these names were specified in fields `features_step`.
 -   means the feature value is missing because the feature calculation
     algorithm crashed or aborted or some other problem occurred. The
-    explanation of such a missing value will need to be registered in `feature_runstatus.arff`.
+    explanation of such a missing value will need to be registered in `instance_feature_runstatus.arff`.
 -   In the case of stochastic features, the user might opt to repeat the
     feature calculation (column `repetition`). The following remarks have to be
     respected:
@@ -228,11 +247,11 @@ repetition) pair.
     -   If you use repetitions, but some features are deterministic,
         simply repeat their feature values across the repetitions.
     -   Whether features are stochastic or deterministic is defined
-        implicit over the feature steps in `features_steps_deterministic` and `features_steps_stochastic` in in `description.txt`.
+        implicit over the feature steps in `instance_features_steps_deterministic` and `instance_features_steps_stochastic` in in `description.txt`.
 
 **Example:**
 ```
-@RELATION FEATURE_VALUES_2013-SAT-Competition
+@RELATION INSTANCE_FEATURE_VALUES_2013-SAT-Competition
 
 @ATTRIBUTE instance_id STRING
 @ATTRIBUTE repetition NUMERIC
@@ -250,10 +269,10 @@ inst3.cnf,2,1002,337,?
 ...
 ```
 
-feature_runstatus.arff
+instance_feature_runstatus.arff
 =======================
 
-This file contains technical information about the feature calculation
+This file contains technical information about the instance feature calculation
 in general. Specifically, it serves to state whether the execution of
 feature processing steps was successful or if some crash occurred. The
 file is designed to allow the user to specify what kind of a crash has
@@ -293,7 +312,7 @@ depend on this processing step as defined in `description.txt`.
 
 **Example:**
 ```
-@RELATION FEATURE_RUNSTATUS_2013-SAT-Competition
+@RELATION INSTANCE_FEATURE_RUNSTATUS_2013-SAT-Competition
 
 @ATTRIBUTE instance_id STRING
 @ATTRIBUTE repetition NUMERIC
@@ -310,7 +329,7 @@ inst3.cnf,2,ok,presolved
 ...
 ```
 
-feature_costs.arff
+instance_feature_costs.arff
 ===================
 
 Although usually a minor overhead, feature computation is rarely free.
@@ -345,7 +364,7 @@ algorithm, are not possible, if feature costs are not provided.
 
 **Example:**
 ```
-@RELATION FEATURE_COSTS_2013-SAT-Competition
+@RELATION INSTANCE_FEATURE_COSTS_2013-SAT-Competition
 
 @ATTRIBUTE instance_id STRING
 @ATTRIBUTE repetition NUMERIC
@@ -359,6 +378,137 @@ inst2.cnf,1,0.2,4.0
 inst2.cnf,2,0.2,?
 inst3.cnf,1,1.1,?
 inst3.cnf,2,1.1,?
+...
+```
+
+algorithm_feature_values.arff
+====================
+
+This file contains the numerical feature values for all algorithms.
+It has the same purpose as `instance_feature_values.arff`. 
+
+-   The first column is called `algorithm` and contains the algorithm name
+    represented as a string. These names must follow the guidelines of
+    utilizing only ASCII characters.
+-   The second column specifies the `repetition` and contains integers, starting at 1
+    and increasing in increments of 1 for each algorithm with the
+    same name.
+-   The following columns correspond to algorithm features. We allow
+    numeric, integer and categorical columns, but only the names defined
+    in `description.txt` can be used. In that file, these names were specified in fields `features_step`.
+-   means the feature value is missing because the feature calculation
+    algorithm crashed or aborted or some other problem occurred. The
+    explanation of such a missing value will need to be registered in `algorithm_feature_runstatus.arff`.
+-   In the case of stochastic features, the user might opt to repeat the
+    feature calculation (column `repetition`). The following remarks have to be
+    respected:
+    -   In case of no repetitions, do not omit the column, simply put a
+        1 in every entry.
+    -   If you use repetitions, you can use a different number of
+        repetitions for algorithms (if you really insist on it), but
+        always the same number of repetitions for features in one row
+        (the latter is enforced by the format definition).
+    -   If you use repetitions, but some features are deterministic,
+        simply repeat their feature values across the repetitions.
+    -   Whether features are stochastic or deterministic is defined
+        implicit over the feature steps in `algorithm_features_steps_deterministic` and `algorithm_features_steps_stochastic` in in `description.txt`.
+
+**Example:**
+```
+@RELATION ALGORITHM_FEATURE_VALUES_2013-SAT-Competition
+
+@ATTRIBUTE algorithm STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE degree_mean NUMERIC
+@ATTRIBUTE degree_variance NUMERIC
+
+@DATA
+minisat,1,5.4,1.3
+candy,1,4.7,1.0
+glucose,1,6.5,1.9
+...
+```
+
+algorithm_feature_runstatus.arff
+=======================
+
+This file contains technical information about the algorithm feature calculation
+in general. It has the same purpose as `instance_feature_runstatus.arff`. 
+
+-   The first column is the and contains the algorithm name in `algorithm`
+    string format. These names must follow the guidelines of utilizing
+    only ASCII characters.
+-   The second column specifies the `repetition` and contains integers, starting at
+    1 and increasing in increments of 1 for each algorithm with the
+    same name.
+-   The two columns `algorithm` and `repetition` must represent exactly the same data as
+    presented in `algorithm_feature_values.arff`.
+-   All remaining columns correspond to feature processing steps. Here,
+    the same column names must be adhered to as was defined in `description.txt`. The
+    entries are categoric values specifying the termination condition
+    for each step. The supported range of these values is:
+    -   `ok`: The step was executed normally.
+    -   `timeout`: Time ran out before this step terminated.
+    -   `memout`: Feature computation ran out of memory causing a crash.
+    -   `crash`: The program failed to execute.
+    -   `unknown`: Feature computation was not run, probably because an earlier
+        feature computation step presolved the instance.
+    -   `other`: Some other critical problem occurred while this feature
+        was computed.
+-   If feature calculation is aborted (`crash` or `other`), you must explain the
+    reasons in the `readme.txt`.
+
+**Example:**
+```
+@RELATION ALGORITHM_FEATURE_RUNSTATUS_2013-SAT-Competition
+
+@ATTRIBUTE algorithm STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE AST {ok, timeout, memout, presolved, crash, other}
+
+@DATA
+minisat,1,ok
+candy,1,ok
+glucose,1,ok
+...
+```
+
+algorithm_feature_costs.arff
+===================
+
+It has the same purpose as `instance_feature_costs.arff`.
+
+-   The first column is the and contains the algorithm name in `algorithm`
+    string format. These names must follow the guidelines of utilizing
+    only ASCII characters.
+-   The second column specifies the `repetition` and contains integers, starting at
+    1 and increasing in increments of 1 for each algorithm with the
+    same name.
+-   The two columns `algorithm` and `repetition` must represent exactly the same data as
+    presented in `algorithm_feature_values.arff`.
+-   All columns correspond to the costs of each feature
+    processing steps. The names of these steps must be exactly the same
+    as those specified in `description.txt` in the feature step section. Entries are
+    numerical, they specify the cost of the processing step for that
+    instance / repetition. We recommend to specify a feature processing
+    step for each feature, if the costs for each feature is known. If
+    only the computation cost for all features is known, specify exactly
+    one processing step.
+-   Put `?` as an entry if the feature computation was not successful due to
+    cut-off or unusual abort.
+
+**Example:**
+```
+@RELATION ALGORITHM_FEATURE_COSTS_2013-SAT-Competition
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE AST NUMERIC
+
+@DATA
+minisat,1,0.4
+candy,2,0.6
+glucose,1,0.8
 ...
 ```
 
