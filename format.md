@@ -111,8 +111,8 @@ scenario in YAML format.
     Algorithmic feature set computation is terminated if memory exceeded this value.
     Might be used both for `runtime` and `solution_quality`. Put `?` if it was not set for experiment.
 -   `number_of_feature_steps [integer]`: Number of feature steps.
--   `feature_steps [list of objects describing feature steps]:`
-    Objects specifying the feature step name, the features it provides,
+-   `feature_steps [list of objects describing instance feature steps]:`
+    Objects specifying the instance feature step name, the features it provides,
     and any dependencies on other feature steps. For instance, probing
     features need normally a preprocessing step. Therefore probing
     features depend on the preprocessing step and the probing step. This
@@ -135,6 +135,10 @@ scenario in YAML format.
     ```
     You are free to use any step names you like, as long as they are
     unique and do not contain illegal characters.
+-   `algorithm_feature_steps [list of objects describing algorithm feature steps]:`
+    Objects specifying the algorithm feature step name, the features it provides,
+    and any dependencies on other feature steps. 
+    It has the same purpose as `feature_steps` field. See above for an example. 
 -   `default_steps [list of strings]`:
     List names of all features which should be used as a default.
 -   `features_deterministic [list of strings]`:
