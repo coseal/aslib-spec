@@ -247,7 +247,9 @@ class CosealReader(object):
         feature_intersec = set(self.metainfo.features_deterministic).intersection(self.metainfo.features_stochastic)
         if feature_intersec:
             Printer.print_w("Intersection of deterministic and stochastic features is not empty: %s" %(str(feature_intersec)))
-        #FIXME: intersection for algorithm features
+        algo_feature_intersec = set(self.metainfo.algorithm_features_deterministic).intersection(self.metainfo.algorithm_features_stochastic)
+        if algo_feature_intersec:
+            Printer.print_w("Intersection of deterministic and stochastic algorithm features is not empty: %s" %(str(algo_feature_intersec)))
         algo_intersec = set(self.metainfo.algorithms_deterministics).intersection(self.metainfo.algorithms_stochastic)
         if algo_intersec:
             Printer.print_w("Intersection of deterministic and stochastic algorithms is not empty: %s" %(str(algo_intersec)))
