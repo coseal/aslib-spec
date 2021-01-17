@@ -943,6 +943,7 @@ class CosealReader(object):
         
     def remove_algorithm_features(self):
         '''
+            remove unused algorithm features
             algo_dict: algorithm name -> Algorithm()
             meta_info: parsed coseal meta information and command line arguments (meta_info.options)
         '''
