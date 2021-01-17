@@ -614,16 +614,9 @@ class CosealReader(object):
             else:
                 pairs_algo_rep.append((algo_name,repetition))
                 
-            #===================================================================
-            # # if runstatus of feature vector is not always ok, remove feature vector
-            # if reduce(lambda x,y: False if ((not x) and y == "ok") else True, stati, False):
-            #     inst_._features = None
-            #===================================================================
             for status, f_step in zip(stati,arff_dict["attributes"][2:]):
                 algo_._features_status[f_step[0]] = status
             
-            #algo_ = self.algorithms[algo_name] = self.algorithms.get(algo_name, Algorithm)
-
     def read_ground_truth(self,file_):
         '''
             read ground truths of all instances
@@ -1051,12 +1044,4 @@ class CosealReader(object):
         for un_feature_indx in unused_index_features:
             self.metainfo.features.pop(un_feature_indx)        
         
-        #=======================================================================
-        # if self.metainfo.options.impute == "none":
-        #     for algo_ in self.algorithms.values():
-        #         if reduce(lambda x,y: False if ((not x) and y.upper() == "OK") else True, algo_._features_status.values(), False):
-        #             algo_._features = None
-        #=======================================================================
-                    
         return True
-        
