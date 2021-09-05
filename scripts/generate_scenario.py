@@ -14,7 +14,7 @@ import arff
 import yaml
 import copy
 
-def generate_scenario(runtime_fn, features_fn, cutoff):
+def generate_scenario(runtime_fn, features_fn, algo_features_fn, cutoff):
     """ generates an ASlib scenario"""
     
     description = {"scenario_id": "UNKNOWN",
@@ -30,9 +30,19 @@ def generate_scenario(runtime_fn, features_fn, cutoff):
                    "metainfo_algorithms": {},
                    "features_deterministic": "?", #TODO
                    "features_stochastic": "",
-                   "number_of_feature_steps": 1,
-                   "feature_steps":{"ALL":{"provides":"?"}}, #TODO
-                   "default_steps": ["ALL"]}
+                   "feature_steps":{"instance":{"provides":"?"}}} #TODO
+
+    if algo_features_fn: 
+        description["algorithm_features_cutoff_time"] = "?"
+        description["algorithm_features_cutoff_memory"] = "?"
+        description["algorithm_features_deterministic"] = "?"
+        description["algorithm_features_stochastic"] = ""
+        description["algorithm_feature_steps"] = {"software":{"provides":"?"}}
+        description["number_of_feature_steps"] = 2
+        description["default_steps"] = ["instance", "software"]
+    else: 
+        description["number_of_feature_steps"] = 1
+        description["default_steps"] = ["instance"]
     
     #default algorithm info
     algo_info = {"configuration": "",
@@ -76,7 +86,7 @@ def generate_scenario(runtime_fn, features_fn, cutoff):
     with open(features_fn, "r") as fp:
         feats = fp.readline().replace("\n", "").split(",")[1:]
         description["features_deterministic"] = copy.deepcopy(feats)
-        description["feature_steps"]["ALL"]["provides"] = feats
+        description["feature_steps"]["instance"]["provides"] = feats
         
         attributes = [ ["instance_id", "STRING"],
                       ["repetition", "NUMERIC"]]
@@ -109,7 +119,7 @@ def generate_scenario(runtime_fn, features_fn, cutoff):
     fs_attributes = [
                      ["instance_id", "STRING"],
                      ["repetition", "NUMERIC"],
-                     ["ALL", ["ok" , "timeout" , "memout" , "not_applicable" , "crash" , "other"]]
+                     ["instance", ["ok" , "timeout" , "memout" , "not_applicable" , "crash" , "other"]]
                      ]
     
     fs_data = {"attributes": fs_attributes,
@@ -119,7 +129,59 @@ def generate_scenario(runtime_fn, features_fn, cutoff):
     
     with open("feature_runstatus.arff", "w") as fp:
         arff.dump(fs_data, fp)
-    
+
+
+    if algo_features_fn:
+        algorithms = []
+        status = {}
+        with open(algo_features_fn, "r") as fp:
+            feats = fp.readline().replace("\n", "").split(",")[1:]
+            description["algorithm_features_deterministic"] = copy.deepcopy(feats)
+            description["algorithm_feature_steps"]["software"]["provides"] = feats
+            
+            attributes = [ ["algorithm", "STRING"],
+                          ["repetition", "NUMERIC"]]
+            data = []
+            
+            for f in feats:
+                attributes.append([f, "NUMERIC"])
+                
+            for line in fp:
+                line = line.replace("\n","").split(",")
+                algo = line[0]
+                feats = line[1:]
+                if sum(map(float, feats)) == -512*len(feats):
+                    status[algo] = "timeout"
+                    feats = ["?"]*len(feats)
+                else:
+                    status[algo] = "ok"
+                d = [algo,1]
+                d.extend(feats)
+                data.append(d)
+                
+        fv_data = {"attributes": attributes,
+                    "data": data,
+                    "relation" : "ALGORITHM_FEATURES"
+                    }
+        with open("algorithm_feature_values.arff", "w") as fp:
+            arff.dump(fv_data, fp)
+            
+        fs_data = [[algo, "1", stat] for algo,stat in status.iteritems()]
+        fs_attributes = [
+                         ["algorithm", "STRING"],
+                         ["repetition", "NUMERIC"],
+                         ["software", ["ok" , "timeout" , "memout" , "not_applicable" , "crash" , "other"]]
+                         ]
+        
+        fs_data = {"attributes": fs_attributes,
+                    "data": fs_data,
+                    "relation" : "ALGORITHM_FEATURES_RUNSTATUS"
+                    }
+        
+        with open("algorithm_feature_runstatus.arff", "w") as fp:
+            arff.dump(fs_data, fp)
+
+
     with open("description.txt", "w") as fp:
         yaml.dump(description, fp, default_flow_style=False)
     
@@ -127,9 +189,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--runtime", required=True, help="csv file with runtimes (rows instances, cols algorithms)")
     parser.add_argument("--features", required=True, help="csv file with instance features (rows instances, cols features)")
+    parser.add_argument("--algo_features", required=False, help="csv file with algorithm features (rows algorithms, cols features)")
     parser.add_argument("--cutoff", required=True, type=float, help="runtime cutoff")
     
     args_ = parser.parse_args()
     
-    generate_scenario(args_.runtime, args_.features, args_.cutoff)
+    generate_scenario(args_.runtime, args_.features, args_.algo_features, args_.cutoff)
     
