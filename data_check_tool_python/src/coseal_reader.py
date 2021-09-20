@@ -158,7 +158,7 @@ class CosealReader(object):
             Printer.print_e("'performance_type' has to be list")
             
         self.metainfo.algorithm_cutoff_time = description.get('algorithm_cutoff_time')
-        self.metainfo.features_cutoff_memory = description.get('algorithm_cutoff_memory')
+        self.metainfo.algorithm_cutoff_memory = description.get('algorithm_cutoff_memory')
         self.metainfo.features_cutoff_time = description.get('features_cutoff_time')
         self.metainfo.features_cutoff_memory = description.get('features_cutoff_memory')
         self.metainfo.features_deterministic = description.get('features_deterministic')
