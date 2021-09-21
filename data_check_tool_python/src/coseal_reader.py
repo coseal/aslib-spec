@@ -694,6 +694,7 @@ class CosealReader(object):
             Printer.print_e("fold as third attribute is missing in %s" %(file_))
         
         rep_fold_dict = {}
+        all_instances = set(self.instances.keys())
         for data in arff_dict["data"]:
             inst_name = data[0]
             rep = int(data[1])
@@ -704,6 +705,7 @@ class CosealReader(object):
                 Printer.print_w("Instance \"%s\" has ground truths but was not found in performance file")
                 continue   
 
+            all_instances.remove(inst_name)
             inst_._fold[rep] = fold
             fold_distribution = rep_fold_dict.get(rep,{})
             rep_fold_dict[rep] = fold_distribution
@@ -712,6 +714,9 @@ class CosealReader(object):
             
         for rep, fold_dist in rep_fold_dict.items():
             Printer.print_c("%d-th repetition: %s distribution" %(rep, ",".join(map(str,list(fold_dist.values())))))
+        
+        if len(all_instances) > 0:
+            Printer.print_e("Instances: %s are missing from cv.arff" % ",".join(all_instances))
             
                 
     def check_instances(self):
